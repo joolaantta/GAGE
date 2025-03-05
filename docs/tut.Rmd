@@ -1,0 +1,45 @@
+---
+title: "Untitled"
+output: pdf_document
+date: "2025-02-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(qcc)
+#Chart Data (5 samples (n=5) taken each hour for 10 hours)
+chartdata <- read.table(header = FALSE, text = "
+49 50 49 49 53
+51 53 51 53 49
+51 52 52 50 51
+48 50 50 51 49
+50 51 49 53 52
+48 51 51 53 50
+51 52 49 51 50
+48 50 52 51 51
+49 52 53 53 57
+48 50 48 52 49")
+# plot xbar chart
+xbar <- qcc(data = chartdata,
+ type = "xbar",
+ sizes = 5,
+ title = "Sample X-bar Chart Title",
+ digits = 5,
+ plot = TRUE,bg.margin = "white", bg.figure = "white")
+# R Chart
+rbar <- qcc(data = chartdata,
+ type = "R",
+ sizes = 5,
+ title = "Sample R Chart Title",
+ digits = 5,
+ plot = TRUE,bg.margin = "white", bg.figure = "white")
+# Determine the Process Capability
+process.capability(xbar,spec.limits=c(45,55),target= 50) 
+
+```
+
