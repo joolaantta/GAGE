@@ -339,13 +339,153 @@ The Gage R&R study indicates that the measurement system is within acceptable li
 
 The findings of this study reinforce the reliability of the measurement system but also highlight areas for improvement. The outlier detected in the R chart suggests that operator training or measurement standardization may be necessary to reduce variability. Furthermore, the observed deviations in the length-by-operator and operator-part interaction graphs indicate that individual operators may not measure consistently across different parts, potentially affecting reproducibility. The process capability analysis shows that while the system is functional, there is room to improve precision, especially in reducing variation near the lower specification limit. Future studies could explore optimizing the measurement process, recalibrating instruments, or enhancing operator training to ensure more consistent results.
 
-## DkIT Declaration
+## Code
 
-```{r, echo=FALSE, results=TRUE, fig.align='center'}
 
-knitr::include_graphics("4.png")
 
+**Gage R&R study** 
+
+```{r echo=TRUE, results=TRUE}
+
+
+# Data for 10 parts, 3 operators and 2 measurements per part
+
+Operator<- factor(rep(1:3, each = 20))
+
+Part<- factor(rep(rep(1:10, each = 2), 3))
+
+# When inputting #operator data: part 1, part 1, part 2, part 2 etc.
+
+Length<-c(49.26,49.28,47.41,47.41,49.19,49.20,47.55,47.53,49.30,49.26,#op1
+  
+  
+      46.38,46.68,  49.39,49.39,  49.10,49.1,   49.29,49.30,  47.60,47.6,
+
+            ##########################
+     49.35, 49.26,  47.44,47.48,  49.17,  49.21,  47.58, 47.59, 49.30,  49.31,#op2
+      
+      
+
+            46.72, 46.79, 49.40, 49.42, 49.08, 49.1, 49.31,  49.34, 47.58, 47.61,
+
+            ##########################
+
+            49.44,   49.37,47.57,   47.43,49.29,   49.27,47.62, 47.67, 49.52, 49.38, #op3
+     
+     46.74,  46.67, 49.5,  49.44, 49.12, 49.19,  49.38, 49.35, 47.62, 47.72
+
+    )
+
+Data<-data.frame(Part,Operator,Length); print(Data)
+
+
+
+#Load package
+
+library("SixSigma")
+
+
+
+#Perform gage R & R
+
+ss.rr(var = Length, part = Part, appr = Operator, data = Data,
+
+             
+
+               main = "Six Sigma Gage R&R Study",
+
+               sub = "",
+
+               alphaLim = 0.05,
+
+               errorTerm = "interaction",
+
+               digits = 4,
+
+               method = "crossed",
+
+               print_plot = TRUE,
+
+               signifstars = TRUE)
 ```
+
+
+ 
+
+**Using R Studio Visual instead of Source coding to create simple and quick tables**
+
+|                 |   VarComp   | %Contrib |
+|:---------------:|:-----------:|:--------:|
+| Total Gage R&R  | 0.005590729 |   0.51   |
+|  Repeatability  | 0.003025417 |   0.27   |
+| Reproducibility | 0.002565313 |   0.23   |
+|    Operator     | 0.002565313 |   0.23   |
+|  Part-to-part   | 1.099021227 |  99.49   |
+| Total Variation | 1.104611956 |   100    |
+
+
+**Adding figures**
+
+```{r echo=TRUE, results=TRUE, fig.height=8, fig.width=12, fig.align='center'}
+
+knitr::include_graphics("f.jpg")
+```
+
+**Boxplot**
+
+
+
+```{r echo=TRUE, results=TRUE, fig.height=8, fig.width=12, fig.align='center'}
+
+library(ggpubr)
+library(gt)
+
+Length<-c(49.26,49.28,47.41,47.41,49.19,49.20,47.55,47.53,49.30,49.26, 46.38,46.68,  49.39,49.39,  49.10,49.1,   49.29,49.30,  47.60,47.6, 49.35, 49.26,  47.44,47.48,  49.17,  49.21,  47.58, 47.59, 49.30,  49.31, 46.72, 46.79, 49.40, 49.42, 49.08, 49.1, 49.31,  49.34, 47.58, 47.61, 49.44,   49.37,47.57,   47.43,49.29,   49.27,47.62, 47.67, 49.52, 49.38,46.74,  46.67, 49.5,  49.44, 49.12, 49.19,  49.38, 49.35, 47.62, 47.72 )
+Operator <- c("Jeff","Jeff","Jeff","Jeff","Jeff","Jeff","Jeff", "Jeff", "Jeff", "Jeff", "Liam","Liam","Liam","Liam","Liam","Liam","Liam", "Liam", "Liam", "Liam", "Jolanta","Jolanta","Jolanta","Jolanta","Jolanta","Jolanta","Jolanta", "Jolanta", "Jolanta", "Jolanta")
+
+mydata <- data.frame(Operator,Length)
+
+ggboxplot(mydata, x = "Operator", y = "Length",
+ order = c("Jeff", "Liam", "Jolanta"),
+ ylab = "Length(mm)", xlab = "Operator")
+
+res.aov <- aov(Length ~ Operator, data = mydata)
+
+mydata3 <- summary(res.aov)
+
+mydata3
+```
+
+**Capability Analysis**
+
+```{r echo=TRUE, results=TRUE, fig.height=8, fig.width=12, fig.align='center'}
+library(qcc)
+
+chartdata <- read.table(header = FALSE, text = "
+49.26 49.28 47.41 47.41 49.19 49.20 47.55 47.53 49.30 49.26
+46.38 46.68 49.39 49.39 49.10 49.1 49.29 49.30  47.60 47.6  ")
+
+
+xbar <- qcc(data = chartdata,
+ type = "xbar",
+ sizes = 10,
+ title = "Sample X-bar Chart Title",
+ digits = 10,
+ plot = TRUE,bg.margin = "white", bg.figure = "white")
+# R Chart
+rbar <- qcc(data = chartdata,
+ type = "R",
+ sizes = 10,
+ title = "Sample R Chart Title",
+ digits = 10,
+ plot = TRUE,bg.margin = "white", bg.figure = "white")
+# Determine the Process Capability
+process.capability(xbar,spec.limits=c(46,50),target= 49)
+```
+
+
+## DKIT Declaration
+
 
 DECLARATION: I declare that:
 
@@ -364,6 +504,7 @@ DECLARATION: I declare that:
 TYPED SIGNATURE: Jolanta Puzule
 
 DATE: 06/03/2025
+
 
 ## References
 
