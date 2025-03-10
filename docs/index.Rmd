@@ -434,7 +434,6 @@ knitr::include_graphics("f.jpg")
 **Boxplot**
 
 
-
 ```{r echo=TRUE, results=TRUE, fig.height=8, fig.width=12, fig.align='center'}
 
 library(ggpubr)
